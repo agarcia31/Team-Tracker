@@ -133,6 +133,54 @@ function loadMainPrompts() {
     }
   });
 }
+// add Employee
+function addEmployee() {
+  // Prompt user for employee information
+  prompt([
+    {
+      type: "input",
+      name: "first_name",
+      message: "What is the employee's first name?",
+    },
+    {
+      type: "input",
+      name: "last_name",
+      message: "What is the employee's last name?",
+    },
+    {
+      type: "list",
+      name: "role_id",
+      message: "What is the employee's role?",
+      choices: () =>
+        db.findAllRoles().then(([rows]) => {
+          return rows.map((row) => ({
+            name: row.title,
+            value: row.id,
+          }));
+        }),
+    },
+    {
+      type: "list",
+      name: "manager_id",
+      message: "Who is the employee's manager?",
+      choices: () =>
+        db.findAllEmployees().then(([rows]) => {
+          return rows.map((row) => ({
+            name: `${row.first_name} ${row.last_name}`,
+            value: row.id,
+          }));
+        }),
+    },
+  ])
+    .then((employee) => {
+      // Insert new employee into database
+      return db.createEmployee(employee);
+    })
+    .then(() => {
+      console.log("New employee added to the database");
+    })
+    .then(() => loadMainPrompts());
+}
 
 // View all employees
 function viewEmployees() {
